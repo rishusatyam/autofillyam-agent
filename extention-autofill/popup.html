@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelID Scanner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>🚀 TravelID Scanner</h2>
+      <p class="subtitle">DOM Intelligence Layer</p>
+    </div>
+    
+    <div class="content">
+      <button id="scanBtn" class="scan-button">
+        <span class="icon">🔍</span>
+        <span class="text">Scan / Autofill</span>
+      </button>
+      
+      <div id="status" class="status hidden"></div>
+      
+      <div id="results" class="results hidden">
+        <div class="result-item">
+          <span class="label">Provider:</span>
+          <span id="provider" class="value">—</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Fields Detected:</span>
+          <span id="fieldCount" class="value">—</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Scan Time:</span>
+          <span id="scanTime" class="value">—</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <small>Click button to scan current page</small>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
