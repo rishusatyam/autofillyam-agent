@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TravelID Scanner</title>
+  <title>TravelID Scanner V2</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h2>🚀 TravelID Scanner</h2>
-      <p class="subtitle">DOM Intelligence Layer</p>
+      <p class="subtitle">Scanner V2 - Production Ready</p>
     </div>
     
     <div class="content">
       <button id="scanBtn" class="scan-button">
         <span class="icon">🔍</span>
-        <span class="text">Scan / Autofill</span>
+        <span class="text">Scan Page</span>
       </button>
       
       <div id="status" class="status hidden"></div>
@@ -31,14 +31,20 @@
           <span id="fieldCount" class="value">—</span>
         </div>
         <div class="result-item">
-          <span class="label">Scan Time:</span>
-          <span id="scanTime" class="value">—</span>
+          <span class="label">Scan Duration:</span>
+          <span id="scanDuration" class="value">—</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Field Types:</span>
+          <span id="fieldTypes" class="value">—</span>
         </div>
       </div>
+
+      <div id="apiStatus" class="api-status hidden"></div>
     </div>
     
     <div class="footer">
-      <small>Click button to scan current page</small>
+      <small>Detects booking fields • Sends to API</small>
     </div>
   </div>
   

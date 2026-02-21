@@ -1,0 +1,15 @@
+{
+  "watch": [
+    "src"
+  ],
+  "ext": "ts,json",
+  "ignore": [
+    "node_modules",
+    "dist",
+    "prisma/migrations"
+  ],
+  "delay": 500,
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

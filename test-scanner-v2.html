@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scanner V2 Test - MakeMyTrip Mock</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    .section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    h2 {
+      color: #333;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    
+    .field-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #555;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    .radio-group, .checkbox-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 8px;
+    }
+    
+    .radio-group label, .checkbox-group label {
+      display: inline-flex;
+      align-items: center;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    
+    .radio-group input, .checkbox-group input {
+      width: auto;
+      margin-right: 5px;
+    }
+    
+    /* Insurance section - should be FILTERED OUT */
+    .insurance {
+      background: #fff3cd;
+      border: 2px dashed #ffc107;
+    }
+    
+    .insurance h2 {
+      border-color: #ffc107;
+      color: #856404;
+    }
+    
+    .promo {
+      background: #e7f3ff;
+      border: 2px dashed #2196F3;
+    }
+    
+    .header {
+      text-align: center;
+      background: #4CAF50;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    
+    .note {
+      background: #f0f0f0;
+      padding: 15px;
+      border-left: 4px solid #4CAF50;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🧪 Scanner V2 Test Page</h1>
+    <p>This page tests the relevance filter. Only "Traveller Details" and "Contact Information" should be detected.</p>
+  </div>
+
+  <div class="note">
+    <strong>📋 Expected Results:</strong><br>
+    ✅ Should detect: Traveller Details (13 fields) + Contact Information (3 fields) + Emergency Contact (2 fields) = <strong>18 fields total</strong><br>
+    ❌ Should filter out: Insurance, Promo, Fare Upgrade sections
+  </div>
+
+  <!-- SHOULD BE DETECTED -->
+  <div class="section">
+    <h2>Traveller Details</h2>
+    
+    <div class="field-group">
+      <label for="firstName">First & Middle Name</label>
+      <input type="text" id="firstName" placeholder="First & Middle Name">
+    </div>
+    
+    <div class="field-group">
+      <label for="lastName">Last Name</label>
+      <input type="text" id="lastName" placeholder="Last Name">
+    </div>
+    
+    <div class="field-group">
+      <label for="dateOfBirth">Date of Birth</label>
+      <input type="date" id="dateOfBirth">
+    </div>
+    
+    <div class="field-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="Email Address">
+    </div>
+    
+    <div class="field-group">
+      <label for="phone">Mobile Number</label>
+      <input type="tel" id="phone" placeholder="Mobile Number">
+    </div>
+    
+    <div class="field-group">
+      <label>Gender</label>
+      <div class="radio-group">
+        <label><input type="radio" name="gender" value="male" checked> Male</label>
+        <label><input type="radio" name="gender" value="female"> Female</label>
+      </div>
+    </div>
+    
+    <div class="field-group">
+      <label for="nationality">Nationality</label>
+      <select id="nationality">
+        <option value="">Select Nationality</option>
+        <option value="IN">India</option>
+        <option value="US">United States</option>
+        <option value="GB">United Kingdom</option>
+      </select>
+    </div>
+    
+    <div class="field-group">
+      <label for="passport">Passport Number</label>
+      <input type="text" id="passport" placeholder="Passport Number">
+    </div>
+    
+    <div class="field-group">
+      <label for="passportIssueDate">Passport Issue Date</label>
+      <input type="date" id="passportIssueDate">
+    </div>
+    
+    <div class="field-group">
+      <label for="passportExpiryDate">Passport Expiry Date</label>
+      <input type="date" id="passportExpiryDate">
+    </div>
+    
+    <div class="field-group">
+      <label for="passportCountry">Passport Issuing Country</label>
+      <select id="passportCountry">
+        <option value="">Select Country</option>
+        <option value="IN">India</option>
+        <option value="US">United States</option>
+        <option value="GB">United Kingdom</option>
+        <option value="CA">Canada</option>
+        <option value="AU">Australia</option>
+      </select>
+    </div>
+    
+    <div class="field-group">
+      <label for="address">Residential Address</label>
+      <textarea id="address" rows="2" placeholder="Enter your address"></textarea>
+    </div>
+    
+    <div class="field-group">
+      <label for="postalCode">Postal Code</label>
+      <input type="text" id="postalCode" placeholder="Postal Code">
+    </div>
+  </div>
+
+  <!-- SHOULD BE DETECTED -->
+  <div class="section">
+    <h2>Contact Information</h2>
+    
+    <div class="field-group">
+      <label for="countryCode">Country Code</label>
+      <select id="countryCode">
+        <option value="+91">India (+91)</option>
+        <option value="+1">USA (+1)</option>
+        <option value="+44">UK (+44)</option>
+      </select>
+    </div>
+    
+    <div class="field-group">
+      <label for="contactPhone">Contact Phone Number</label>
+      <input type="tel" id="contactPhone" placeholder="Contact Number">
+    </div>
+    
+    <div class="field-group">
+      <label for="contactEmail">Contact Email</label>
+      <input type="email" id="contactEmail" placeholder="For booking confirmation">
+    </div>
+  </div>
+
+  <!-- SHOULD BE DETECTED -->
+  <div class="section">
+    <h2>Emergency Contact</h2>
+    
+    <div class="field-group">
+      <label for="emergencyName">Emergency Contact Name</label>
+      <input type="text" id="emergencyName" placeholder="Full Name">
+    </div>
+    
+    <div class="field-group">
+      <label for="emergencyPhone">Emergency Contact Phone</label>
+      <input type="tel" id="emergencyPhone" placeholder="Emergency Contact Number">
+    </div>
+  </div>
+
+  <!-- SHOULD BE FILTERED OUT -->
+  <div class="section insurance">
+    <h2>Trip Secure - Travel Insurance</h2>
+    <p><strong>❌ This section should be IGNORED by relevance filter</strong></p>
+    
+    <div class="field-group">
+      <label>Select Insurance Plan</label>
+      <div class="radio-group">
+        <label><input type="radio" name="insurance" value="basic" checked> Basic Coverage</label>
+        <label><input type="radio" name="insurance" value="premium"> Premium Coverage</label>
+        <label><input type="radio" name="insurance" value="none"> No Insurance</label>
+      </div>
+    </div>
+    
+    <div class="field-group">
+      <label for="insuranceAmount">Coverage Amount</label>
+      <input type="text" id="insuranceAmount" placeholder="Enter amount">
+    </div>
+  </div>
+
+  <!-- SHOULD BE FILTERED OUT -->
+  <div class="section promo">
+    <h2>Apply Promo Code</h2>
+    <p><strong>❌ This section should be IGNORED by relevance filter</strong></p>
+    
+    <div class="field-group">
+      <label for="promoCode">Enter Coupon Code</label>
+      <input type="text" id="promoCode" placeholder="Enter promo code">
+    </div>
+    
+    <div class="checkbox-group">
+      <label><input type="checkbox" id="newsletter"> Send me promotional offers</label>
+    </div>
+  </div>
+
+  <!-- SHOULD BE FILTERED OUT -->
+  <div class="section" style="background: #ffe0e0; border: 2px dashed #f44336;">
+    <h2>Fare Upgrade Options</h2>
+    <p><strong>❌ This section should be IGNORED by relevance filter</strong></p>
+    
+    <div class="field-group">
+      <label>Upgrade Your Fare</label>
+      <div class="radio-group">
+        <label><input type="radio" name="fareUpgrade" value="economy" checked> Economy</label>
+        <label><input type="radio" name="fareUpgrade" value="premium"> Premium Economy</label>
+        <label><input type="radio" name="fareUpgrade" value="business"> Business Class</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top: 30px; border-color: #2196F3;">
+    <strong>🧪 How to Test:</strong><br>
+    1. Reload the extension in Chrome (manifest.json was updated)<br>
+    2. Open this page and click the extension icon<br>
+    3. Check console logs - should detect 18 fields<br>
+    4. Verify payload includes all sections: Traveller, Contact, Emergency<br>
+    5. Payload JSON file will auto-save to Downloads/TravelID_Payloads/<br>
+    6. Insurance, Promo, and Fare Upgrade sections should be filtered out<br>
+    7. Calendar fields (DOB, Passport dates) should be detected
+  </div>
+
+  <script>
+    console.log('✅ Test page loaded');
+    console.log('📊 Expected: 18 relevant fields');
+    console.log('📋 Sections: Traveller (13) + Contact (3) + Emergency (2)');
+    console.log('❌ Should ignore: insurance, promo, fare upgrade fields');
+  </script>
+</body>
+</html>

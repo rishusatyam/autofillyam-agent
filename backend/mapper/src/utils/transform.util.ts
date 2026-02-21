@@ -109,12 +109,22 @@ export const MOCK_USER_PROFILE = {
       last:   'Sharma',
     },
     gender: 'Male',
+    dateOfBirth: '1995-03-15',
+    nationality: 'Indian',
     contact: {
       phone: {
         primary:   '9876543210',
         secondary: '9123456780',
       },
       email: 'ayush@example.com',
+      countryCode: '+91',
+    },
+    address: {
+      residential: '123 MG Road, Koramangala',
+      city: 'Bangalore',
+      state: 'Karnataka',
+      postalCode: '560034',
+      country: 'India',
     },
     preferences: {
       travel: {
@@ -125,7 +135,16 @@ export const MOCK_USER_PROFILE = {
     documents: {
       passport: {
         number: 'N1234567',
-        expiry: '2030-01-01',
+        issueDate: '2020-03-15',
+        expiryDate: '2030-03-15',
+        issuingCountry: 'India',
+      },
+    },
+    emergency: {
+      contact: {
+        name: 'Priya Sharma',
+        relationship: 'Spouse',
+        phone: '9988776655',
       },
     },
   },

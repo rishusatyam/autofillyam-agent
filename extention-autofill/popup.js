@@ -1,9 +1,14 @@
-// Popup controller - handles UI interactions
+// ========================================
+// Popup Controller - Scanner V2
+// ========================================
+// Handles UI interactions for production-ready scanner
+// Sends clean payloads to backend mapping API
 
 document.addEventListener('DOMContentLoaded', () => {
   const scanBtn = document.getElementById('scanBtn');
   const statusDiv = document.getElementById('status');
   const resultsDiv = document.getElementById('results');
+  const apiStatusDiv = document.getElementById('apiStatus');
 
   // Scan button handler
   scanBtn.addEventListener('click', async () => {
@@ -43,10 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (response?.success) {
         displayResults(response.data);
-        await saveToStorage(response.data);
-        // Automatically download JSON file
-        downloadJSON(response.data);
-        setStatus('✅ Scan completed and JSON saved!', 'success');
+        setStatus('✅ Scan completed successfully!', 'success');
       } else {
         throw new Error(response?.error || 'Scan failed');
       }
@@ -92,33 +94,31 @@ document.addEventListener('DOMContentLoaded', () => {
   function displayResults(data) {
     document.getElementById('provider').textContent = data.provider || 'Unknown';
     document.getElementById('fieldCount').textContent = data.fields?.length || 0;
-    document.getElementById('scanTime').textContent = formatTimestamp(data.scannedAt);
+    document.getElementById('scanDuration').textContent = `${data.metadata?.scanDuration || 0}ms`;
+    
+    // Display type breakdown
+    const typeBreakdown = data.metadata?.typeSummary || {};
+    const typeText = Object.entries(typeBreakdown)
+      .map(([type, count]) => `${type}: ${count}`)
+      .join(', ');
+    document.getElementById('fieldTypes').textContent = typeText || '—';
     
     resultsDiv.classList.remove('hidden');
-  }
-
-  function formatTimestamp(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString();
-  }
-
-  async function saveToStorage(data) {
-    const key = `scan_${data.provider}_${Date.now()}`;
-    await chrome.storage.local.set({ 
-      [key]: data
-    });
-  }
-
-  function downloadJSON(data) {
-    const filename = `scan_${data.provider}_${Date.now()}.json`;
-    const jsonStr = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
     
-    chrome.downloads.download({
-      url: url,
-      filename: filename,
-      saveAs: false
-    });
+    // Update API status if available
+    updateAPIStatus(true);
+  }
+
+  function updateAPIStatus(success) {
+    if (!apiStatusDiv) return;
+    
+    if (success) {
+      apiStatusDiv.textContent = '🟢 Backend API: Connected';
+      apiStatusDiv.className = 'api-status success';
+    } else {
+      apiStatusDiv.textContent = '🔴 Backend API: Offline';
+      apiStatusDiv.className = 'api-status error';
+    }
+    apiStatusDiv.classList.remove('hidden');
   }
 });

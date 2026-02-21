@@ -1,13 +1,12 @@
 {
   "manifest_version": 3,
   "name": "TravelID Autofill Scanner",
-  "version": "1.0.0",
-  "description": "DOM Intelligence Layer - Scans and maps form fields on booking websites",
+  "version": "2.0.0",
+  "description": "Scanner V2 - Detects booking fields, filters noise, sends to mapping API",
   "permissions": [
     "activeTab",
-    "storage",
-    "downloads",
-    "scripting"
+    "scripting",
+    "downloads"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -19,11 +18,8 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["utils.js", "scanner.js", "content.js"],
+      "js": ["utils.js", "scanner.js", "autofill.js", "content.js"],
       "run_at": "document_idle"
     }
-  ],
-  "background": {
-    "service_worker": "background.js"
-  }
+  ]
 }
