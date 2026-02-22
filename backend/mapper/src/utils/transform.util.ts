@@ -1,5 +1,12 @@
 import { SemanticKey } from '../dto/mapping.dto';
 
+type ScannedFieldLike = {
+  fieldId: string;
+  type?: string | null;
+  label?: string | null;
+  placeholder?: string | null;
+};
+
 /**
  * Transformation utilities for converting LLM mapping output into autofill values.
  *
@@ -73,9 +80,17 @@ export function getValueByPath(
  */
 export function transformMappingToValues(
   mapping: Record<string, string | null>,
-  profile: Record<string, any>
+  profile: Record<string, any>,
+  fields?: ScannedFieldLike[]
 ): Record<string, any> {
   const result: Record<string, any> = {};
+
+  const fieldsById: Record<string, ScannedFieldLike> = {};
+  if (Array.isArray(fields)) {
+    for (const f of fields) {
+      if (f?.fieldId) fieldsById[f.fieldId] = f;
+    }
+  }
 
   for (const fieldId of Object.keys(mapping)) {
     const semanticPath = mapping[fieldId];
@@ -92,9 +107,64 @@ export function transformMappingToValues(
       // Defensive catch — getValueByPath should never throw, but just in case
       result[fieldId] = null;
     }
+
+    // Post-process: if UI expects a combined name string, compose it from profile.
+    const field = fieldsById[fieldId];
+    const composed = field ? _composeNameValue(field, profile) : null;
+    if (composed !== null) {
+      result[fieldId] = composed;
+    }
   }
 
   return result;
+}
+
+function _norm(s: unknown): string {
+  return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function _joinParts(parts: Array<string | null | undefined>): string | null {
+  const out = parts
+    .map((p) => (typeof p === 'string' ? p.trim() : ''))
+    .filter((p) => p.length > 0);
+  return out.length > 0 ? out.join(' ') : null;
+}
+
+function _composeNameValue(field: ScannedFieldLike, profile: Record<string, any>): string | null {
+  // Only for text-like fields
+  const t = _norm(field.type);
+  if (t && t !== 'text') return null;
+
+  const label = _norm(field.label);
+  const ph = _norm(field.placeholder);
+  const hay = `${label} ${ph}`.trim();
+  if (!hay) return null;
+
+  const first = getValueByPath(profile, 'user.name.first');
+  const middle = getValueByPath(profile, 'user.name.middle');
+  const last = getValueByPath(profile, 'user.name.last');
+
+  const hasFirst = /\b(first|given)\b/.test(hay);
+  const hasMiddle = /\bmiddle\b/.test(hay);
+  const hasLast = /\b(last|surname|family)\b/.test(hay);
+  const hasFull = /\bfull\s*name\b/.test(hay);
+
+  // First & Middle
+  if ((hasFirst && hasMiddle) && !hasLast && !hasFull) {
+    return _joinParts([first, middle]);
+  }
+
+  // First & Last (single field)
+  if ((hasFirst && hasLast) && !hasMiddle && !hasFull) {
+    return _joinParts([first, last]);
+  }
+
+  // Full name: First Middle Last
+  if (hasFull || (hasFirst && hasMiddle && hasLast)) {
+    return _joinParts([first, middle, last]);
+  }
+
+  return null;
 }
 
 // ---------------------------------------------------------------------------

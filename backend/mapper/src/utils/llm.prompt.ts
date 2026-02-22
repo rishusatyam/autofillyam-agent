@@ -75,7 +75,8 @@ INSTRUCTIONS (CRITICAL):
 2. Map ONLY the fieldIds provided in FORM FIELDS above (do not add extra fields).
 3. Each fieldId maps to EXACTLY ONE path from AVAILABLE PATHS above, or null if no clear match.
 4. Use EXACT path strings from the list above. Match based on semantic meaning.
-5. No duplicates — each path should be used at most once across all fields.
+5. Avoid duplicates — each path should be used at most once across all fields.
+   Exception: name-part paths (user.name.first / user.name.middle / user.name.last) may be reused when the UI has combined name fields like "First & Middle Name" or "Full Name".
 6. For unambiguous matches → use the path. For ambiguous or irrelevant fields → use null.
 7. Common mappings:
    - First/Given name → user.name.first
@@ -83,7 +84,7 @@ INSTRUCTIONS (CRITICAL):
    - Last/Surname/Family name → user.name.last
    - Email → user.contact.email
    - Phone/Mobile → user.contact.phone.primary
-   - Country code/dial code → user.contact.countryCode
+   - Country code/dial code → user.preferences.travel.country_code
    - Gender/Sex → user.gender
    - Date of birth/DOB → user.dateOfBirth
    - Nationality/Citizenship → user.nationality

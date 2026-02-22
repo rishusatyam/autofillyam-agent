@@ -18,7 +18,37 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["utils.js", "scanner.js", "autofill.js", "content.js"],
+      "js": [
+        "utils/logger.js",
+        "utils/provider.js",
+        "utils/visibility.js",
+        "utils/dom.js",
+
+        "scanner/processors/labelResolver.js",
+        "scanner/processors/sectionResolver.js",
+        "scanner/processors/relevanceFilter.js",
+        "scanner/processors/dedupe.js",
+        "scanner/processors/fieldId.js",
+
+        "scanner/detectors/textDetector.js",
+        "scanner/detectors/dropdownDetector.js",
+        "scanner/detectors/radioDetector.js",
+        "scanner/detectors/checkboxDetector.js",
+        "scanner/detectors/toggleDetector.js",
+
+        "scanner/index.js",
+
+        "autofill/strategies/textFill.js",
+        "autofill/strategies/dropdownFill.js",
+        "autofill/strategies/radioFill.js",
+        "autofill/strategies/checkboxFill.js",
+        "autofill/registry.js",
+        "autofill/index.js",
+
+        "api/mappingClient.js",
+
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ]

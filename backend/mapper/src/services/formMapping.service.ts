@@ -30,7 +30,7 @@ export async function resolveMapping(req: MappingRequest): Promise<MappingRespon
     }
     
     // Transform directly: path → value
-    const values = transformMappingToValues(mapping, MOCK_USER_PROFILE);
+    const values = transformMappingToValues(mapping, MOCK_USER_PROFILE, fields);
     
     return { provider, mapping, values };
   }
@@ -50,7 +50,7 @@ export async function resolveMapping(req: MappingRequest): Promise<MappingRespon
   console.log(`[FormMapping] Stored mapping for ${provider}`);
 
   // Transform directly: path → value
-  const values = transformMappingToValues(mapping, MOCK_USER_PROFILE);
+  const values = transformMappingToValues(mapping, MOCK_USER_PROFILE, fields);
 
   return { provider, mapping, values };
 }
