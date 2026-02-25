@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import formMappingRoutes from './routes/formMapping.routes';
+import searchMappingRoutes from './routes/searchMapping.routes';
 
 /**
  * Creates and configures the Express application.
@@ -22,6 +23,7 @@ export function createApp(): Express {
 
   // Routes
   app.use('/', formMappingRoutes);
+  app.use('/', searchMappingRoutes);
 
   // Health check
   app.get('/health', (_req: Request, res: Response) => {

@@ -23,6 +23,8 @@
         "utils/provider.js",
         "utils/visibility.js",
         "utils/dom.js",
+        "utils/modeDetector.js",
+        "utils/verticalDetector.js",
 
         "scanner/processors/labelResolver.js",
         "scanner/processors/sectionResolver.js",
@@ -38,6 +40,18 @@
 
         "scanner/index.js",
 
+        "scanner/searchProcessors/containerFinder.js",
+        "scanner/searchProcessors/blockExtractor.js",
+        "scanner/searchProcessors/labelExtractor.js",
+        "scanner/searchProcessors/searchDedupe.js",
+
+        "scanner/searchDetectors/locationDetector.js",
+        "scanner/searchDetectors/dateDetector.js",
+        "scanner/searchDetectors/counterDetector.js",
+        "scanner/searchDetectors/toggleDetector.js",
+
+        "scanner/searchScanner.js",
+
         "autofill/strategies/textFill.js",
         "autofill/strategies/dropdownFill.js",
         "autofill/strategies/radioFill.js",
@@ -45,7 +59,19 @@
         "autofill/registry.js",
         "autofill/index.js",
 
+        "autofill/searchHelpers/domHelpers.js",
+        "autofill/searchHelpers/waitHelpers.js",
+
+        "autofill/searchStrategies/locationFill.js",
+        "autofill/searchStrategies/dateFill.js",
+        "autofill/searchStrategies/counterFill.js",
+        "autofill/searchStrategies/toggleFill.js",
+        "autofill/searchStrategies/dropdownFill.js",
+
+        "autofill/searchAutofill.js",
+
         "api/mappingClient.js",
+        "api/searchMappingClient.js",
 
         "content.js"
       ],

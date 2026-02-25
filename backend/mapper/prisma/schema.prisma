@@ -19,3 +19,19 @@ model FormMapping {
 
   @@unique([provider, formSignature])           // same form on same site = one record
 }
+
+/// Stores the LLM-generated search form field → semantic search key mapping.
+/// Keyed by (provider + vertical + formSignature) to avoid duplicate LLM calls.
+/// Signature intentionally excludes fieldId and placeholder — only type/label/section
+/// are used so the same widget layout always hits the cache even across page reloads.
+model SearchMapping {
+  id            String   @id @default(uuid())
+  provider      String                          // e.g. "goibibo.com"
+  vertical      String                          // e.g. "flight", "hotel", "train"
+  formSignature String                          // SHA256 of provider+vertical+sorted(type:label:section)
+  mapping       Json                            // { fieldId: "search.semantic_key | null" }
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([provider, vertical, formSignature]) // same search form = one record per vertical
+}
