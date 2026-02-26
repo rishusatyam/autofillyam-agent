@@ -27,6 +27,7 @@
     'td[aria-label]',
     'div[aria-label][role="button"]',
     'button[aria-label]',
+    '[class*="DayPicker-Day" i]',
     'td[class*="day" i]:not([class*="disabled" i])',
     'div[class*="day" i]:not([class*="disabled" i])',
     'button[class*="day" i]:not([class*="disabled" i])',
@@ -190,6 +191,8 @@
     const cells = Array.from(document.querySelectorAll(CALENDAR_DAY_SELECTORS));
 
     for (const cell of cells) {
+      if (_isDisabledCell(cell)) continue;
+
       // Strategy 1: data-date attribute (most reliable)
       const dataDate = cell.getAttribute('data-date') || cell.getAttribute('data-value');
       if (dataDate) {
@@ -229,15 +232,36 @@
     const cells = Array.from(document.querySelectorAll(CALENDAR_DAY_SELECTORS));
 
     for (const cell of cells) {
-      const text = cell.textContent.trim();
-      if (text === String(day)) {
-        if (cell.getAttribute('aria-disabled') === 'true') continue;
-        if ((cell.className || '').toString().toLowerCase().includes('disabled')) continue;
+      if (_isDisabledCell(cell)) continue;
+
+      // MMT cells often contain: "17\n4294" (day + fare). Match the leading day.
+      const raw = (cell.textContent || '').replace(/\s+/g, ' ').trim();
+      const m = raw.match(/^(\d{1,2})\b/);
+      const dayNum = m ? m[1] : '';
+
+      if (dayNum === String(day)) {
         searchClick(cell);
         return true;
       }
     }
 
+    return false;
+  }
+
+  function _isDisabledCell(cell) {
+    try {
+      if (cell.getAttribute('aria-disabled') === 'true') return true;
+
+      const cls = (cell.className || '').toString().toLowerCase();
+      if (cls.includes('disabled') || cls.includes('inactive') || cls.includes('blocked') || cls.includes('outside')) {
+        return true;
+      }
+
+      // If the cell is in a hidden subtree, ignore it
+      if (cell.closest('[aria-hidden="true"]')) return true;
+    } catch (_) {
+      // ignore
+    }
     return false;
   }
 
