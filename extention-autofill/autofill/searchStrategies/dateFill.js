@@ -72,6 +72,82 @@
   // ────────────────────────────────────────────────────────────────────────
 
   /**
+   * Click a calendar day cell with full event sequence for React compatibility.
+   * Uses multiple strategies: direct click, focus+Enter, and event simulation.
+   *
+   * @param {Element} cell
+   */
+  function _clickCalendarDay(cell) {
+    if (!cell) return;
+    
+    const { Logger } = window.TravelID;
+    
+    cell.scrollIntoView?.({ block: 'center', behavior: 'instant' });
+    
+    const rect = cell.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    // Strategy 1: Try native click first (most reliable if it works)
+    try {
+      cell.click();
+      Logger.info(`[DateFill] Native click dispatched`);
+    } catch (e) {
+      Logger.warn(`[DateFill] Native click failed: ${e.message}`);
+    }
+
+    // Strategy 2: Focus + Enter key (works for keyboard-accessible calendars)
+    try {
+      if (cell.tabIndex === -1) cell.tabIndex = 0; // Make focusable
+      cell.focus();
+      
+      const enterEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        code: 'Enter',
+        keyCode: 13,
+        which: 13,
+        bubbles: true,
+        cancelable: true
+      });
+      cell.dispatchEvent(enterEvent);
+      
+      const spaceEvent = new KeyboardEvent('keydown', {
+        key: ' ',
+        code: 'Space',
+        keyCode: 32,
+        which: 32,
+        bubbles: true,
+        cancelable: true
+      });
+      cell.dispatchEvent(spaceEvent);
+      
+      Logger.info(`[DateFill] Focus + keyboard events dispatched`);
+    } catch (e) {
+      Logger.warn(`[DateFill] Focus/keyboard strategy failed: ${e.message}`);
+    }
+
+    // Strategy 3: Full event sequence with coordinates
+    const shared = { bubbles: true, cancelable: true, clientX: cx, clientY: cy, view: window };
+
+    try {
+      // Pointer events
+      cell.dispatchEvent(new PointerEvent('pointerdown', { ...shared, pointerId: 1, isPrimary: true, pointerType: 'mouse' }));
+      cell.dispatchEvent(new PointerEvent('pointerup',   { ...shared, pointerId: 1, isPrimary: true, pointerType: 'mouse' }));
+      
+      // Mouse events
+      cell.dispatchEvent(new MouseEvent('mousedown', shared));
+      cell.dispatchEvent(new MouseEvent('mouseup',   shared));
+      cell.dispatchEvent(new MouseEvent('click',     { ...shared, detail: 1 }));
+      
+      Logger.info(`[DateFill] Full event sequence dispatched at (${cx.toFixed(0)}, ${cy.toFixed(0)})`);
+    } catch (e) {
+      Logger.warn(`[DateFill] Event sequence failed: ${e.message}`);
+    }
+  }
+
+  // ────────────────────────────────────────────────────────────────────────
+
+  /**
    * Fill a date picker.
    *
    * @param {HTMLElement} el    - date picker container
@@ -84,6 +160,8 @@
       searchWaitForElement, searchDispatchChangeEvent,
     } = window.TravelID;
 
+    Logger.info(`[DateFill] Starting date fill for: ${value}`);
+
     const targetDate = new Date(value);
     if (isNaN(targetDate.getTime())) {
       Logger.warn('[DateFill] Invalid date:', value);
@@ -93,18 +171,62 @@
     // Step 1: Native date input fast-path
     const nativeInput = el.querySelector('input[type="date"]');
     if (nativeInput) {
+      Logger.info('[DateFill] Using native date input');
       searchSetNativeValue(nativeInput, value);
       searchDispatchChangeEvent(nativeInput);
       return true;
     }
 
-    // Step 2: Click to open calendar
+    // Step 2: Click to open calendar and wait for cells to appear
+    Logger.info('[DateFill] Clicking field to open calendar');
     searchClick(el);
     await searchSleep(WAIT_AFTER_CLICK);
 
+    // Wait for calendar cells to appear (retry if needed)
+    let existingCells = document.querySelectorAll(CALENDAR_DAY_SELECTORS);
+    for (let retry = 0; retry < 3 && existingCells.length === 0; retry++) {
+      Logger.info(`[DateFill] No cells yet (attempt ${retry + 1}/3), retrying click…`);
+      searchClick(el);
+      await searchSleep(600);
+      existingCells = document.querySelectorAll(CALENDAR_DAY_SELECTORS);
+    }
+    if (existingCells.length === 0) {
+      Logger.warn('[DateFill] Calendar did not open after retries');
+      return false;
+    }
+    Logger.info(`[DateFill] Calendar ready with ${existingCells.length} cells`);
+
     // Step 3: Navigate months + click the correct day cell
     const clicked = await _navigateAndClickDay(targetDate);
-    if (clicked) return true;
+    if (clicked) {
+      Logger.info('[DateFill] Day cell clicked, waiting for UI update...');
+      await searchSleep(500);
+      
+      // Verify the date was actually selected by checking for aria-selected or selected class
+      const targetDay = targetDate.getDate();
+      const selectedCells = document.querySelectorAll(
+        '[aria-selected="true"], [class*="selected" i]:not([class*="disabled" i])'
+      );
+      
+      let verified = false;
+      for (const cell of selectedCells) {
+        const text = (cell.textContent || '').trim();
+        const dayMatch = text.match(/^(\d{1,2})\b/);
+        if (dayMatch && dayMatch[1] === String(targetDay)) {
+          verified = true;
+          Logger.info(`[DateFill] ✓ Verified: Day ${targetDay} is now selected`);
+          break;
+        }
+      }
+      
+      if (!verified) {
+        Logger.warn(`[DateFill] ⚠ Click succeeded but day ${targetDay} not showing as selected. Calendar might need different interaction.`);
+      }
+      
+      return true;
+    }
+
+    Logger.warn('[DateFill] ✗ Failed to click date cell in calendar');
 
     // Step 4: Text input fallback
     const input = await searchWaitForElement(
@@ -134,7 +256,7 @@
    * @returns {Promise<boolean>}
    */
   async function _navigateAndClickDay(targetDate) {
-    const { searchClick, searchSleep } = window.TravelID;
+    const { searchClick, searchSleep, Logger } = window.TravelID;
     const targetDay   = targetDate.getDate();
     const targetMonth = targetDate.getMonth();
     const targetYear  = targetDate.getFullYear();
@@ -147,11 +269,13 @@
       // Detect what month the calendar is currently showing
       const current = _detectCalendarMonth();
       if (current !== null) {
+        Logger.info(`[DateFill] Calendar showing: ${MONTH_NAMES[current.month]} ${current.year}`);
         const cmDate = new Date(current.year, current.month);
         const tgDate = new Date(targetYear, targetMonth);
 
         if (cmDate.getTime() === tgDate.getTime()) {
-          // Correct month shown — try clicking by day number alone
+          // Correct month shown — try clicking by day number
+          Logger.info(`[DateFill] Correct month visible, trying day number match for day ${targetDay}`);
           return _clickDayByNumber(targetDay);
         }
 
@@ -159,13 +283,20 @@
         const selector = tgDate > cmDate ? NEXT_MONTH_SELECTORS : PREV_MONTH_SELECTORS;
         const navBtn = document.querySelector(selector);
         if (navBtn) {
+          Logger.info(`[DateFill] Navigating ${tgDate > cmDate ? 'forward' : 'backward'}`);
           searchClick(navBtn);
           await searchSleep(300);
           continue;
         }
+      } else {
+        Logger.info('[DateFill] Could not detect calendar month, trying day number match');
       }
 
-      // Can't detect month — try next anyway
+      // Month detection failed — still try clicking by day number as fallback
+      const clickedByNum = _clickDayByNumber(targetDay);
+      if (clickedByNum) return true;
+
+      // Can't detect month, can't find day — try next month
       const nextBtn = document.querySelector(NEXT_MONTH_SELECTORS);
       if (nextBtn) {
         searchClick(nextBtn);
@@ -175,7 +306,9 @@
       }
     }
 
-    return false;
+    // Last resort after loop exhaustion
+    Logger.info('[DateFill] Last resort: trying day number match');
+    return _clickDayByNumber(targetDay);
   }
 
   /**
@@ -187,8 +320,9 @@
    * @returns {boolean}
    */
   function _tryClickDayCell(day, month, year) {
-    const { searchClick } = window.TravelID;
+    const { Logger } = window.TravelID;
     const cells = Array.from(document.querySelectorAll(CALENDAR_DAY_SELECTORS));
+    Logger.info(`[DateFill] Searching ${cells.length} cells for day ${day}/${month+1}/${year} via data attributes`);
 
     for (const cell of cells) {
       if (_isDisabledCell(cell)) continue;
@@ -201,7 +335,8 @@
             d.getFullYear() === year &&
             d.getMonth() === month &&
             d.getDate() === day) {
-          searchClick(cell);
+          Logger.info(`[DateFill] ✓ Found exact match via data-date: ${dataDate} (${cell.tagName}.${(cell.className || '').toString().slice(0, 40)})`);
+          _clickCalendarDay(cell);
           return true;
         }
       }
@@ -211,7 +346,8 @@
       if (ariaLabel) {
         const d = _parseAriaDate(ariaLabel);
         if (d && d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
-          searchClick(cell);
+          Logger.info(`[DateFill] ✓ Found exact match via aria-label: ${ariaLabel} (${cell.tagName}.${(cell.className || '').toString().slice(0, 40)})`);
+          _clickCalendarDay(cell);
           return true;
         }
       }
@@ -228,11 +364,17 @@
    * @returns {boolean}
    */
   function _clickDayByNumber(day) {
-    const { searchClick } = window.TravelID;
+    const { Logger } = window.TravelID;
     const cells = Array.from(document.querySelectorAll(CALENDAR_DAY_SELECTORS));
+    Logger.info(`[DateFill] Trying text match for day ${day} across ${cells.length} cells`);
 
     for (const cell of cells) {
       if (_isDisabledCell(cell)) continue;
+
+      // Skip elements that are too large to be day cells (date range displays, banners)
+      const rect = cell.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) continue;
+      if (rect.width > 120 || rect.height > 100) continue;
 
       // MMT cells often contain: "17\n4294" (day + fare). Match the leading day.
       const raw = (cell.textContent || '').replace(/\s+/g, ' ').trim();
@@ -240,11 +382,13 @@
       const dayNum = m ? m[1] : '';
 
       if (dayNum === String(day)) {
-        searchClick(cell);
+        Logger.info(`[DateFill] ✓ Found day ${day} via text match (${rect.width.toFixed(0)}x${rect.height.toFixed(0)}px): "${raw.slice(0, 20)}" (${cell.tagName}.${(cell.className || '').toString().slice(0, 40)})`);
+        _clickCalendarDay(cell);
         return true;
       }
     }
 
+    Logger.warn(`[DateFill] ✗ Day ${day} not found by text match`);
     return false;
   }
 
@@ -278,6 +422,10 @@
 
     for (const header of headers) {
       const text = header.textContent.trim().toLowerCase();
+
+      // Real month headers are short (e.g., "March 2026"), skip long page elements
+      if (text.length > 50) continue;
+
       const yearMatch = text.match(/\b(20\d{2})\b/);
       if (!yearMatch) continue;
 
