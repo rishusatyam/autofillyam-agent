@@ -49,6 +49,8 @@
         "scanner/searchDetectors/dateDetector.js",
         "scanner/searchDetectors/counterDetector.js",
         "scanner/searchDetectors/toggleDetector.js",
+        "scanner/searchDetectors/travellersClassDetector.js",
+        "scanner/searchDetectors/travellersFieldsDetector.js",
 
         "scanner/searchScanner.js",
 

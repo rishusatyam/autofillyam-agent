@@ -91,8 +91,8 @@
       const blocks = extractSearchBlocks(this.container);
       Logger.debug(`Extracted ${blocks.length} interactive blocks`);
 
-      // Step 4: Run all field detectors on the blocks
-      this._runDetectors(blocks);
+      // Step 4: Run all field detectors on the blocks (async for travellers)
+      await this._runDetectors(blocks);
       Logger.debug(`Detected ${this.fields.size} fields after detection`);
 
       // Step 4.5: Remove cross-detector element duplicates
@@ -143,26 +143,40 @@
      * Each detector skips fields already in this.fields (dedup by key).
      *
      * @param {Element[]} blocks
+     * @returns {Promise<void>}
      */
-    _runDetectors(blocks) {
+    async _runDetectors(blocks) {
       const {
         detectSearchLocations,
         detectSearchDates,
-        detectSearchCounters,
-        detectSearchToggles,
+        detectAndOpenTravellersPopup,
+        scanTravellersFields,
+        Logger,
       } = window.TravelID;
 
+      // Sync detectors - run immediately
       for (const { key, field } of detectSearchLocations(blocks, this.fields)) {
         this.fields.set(key, field);
       }
       for (const { key, field } of detectSearchDates(blocks, this.fields)) {
         this.fields.set(key, field);
       }
-      for (const { key, field } of detectSearchCounters(blocks, this.fields)) {
-        this.fields.set(key, field);
-      }
-      for (const { key, field } of detectSearchToggles(blocks, this.container, this.fields)) {
-        this.fields.set(key, field);
+
+      // Async travellers detector - open popup and scan fields
+      Logger?.debug('[SearchScanner] Starting travellers detection...');
+      const popup = await detectAndOpenTravellersPopup(blocks);
+      
+      if (popup) {
+        Logger?.debug('[SearchScanner] Popup ready, scanning fields...');
+        const travellersFields = scanTravellersFields(popup, this.fields);
+        
+        for (const { key, field } of travellersFields) {
+          this.fields.set(key, field);
+        }
+        
+        Logger?.info(`[SearchScanner] Added ${travellersFields.length} travellers fields`);
+      } else {
+        Logger?.debug('[SearchScanner] No travellers popup detected');
       }
     }
 
