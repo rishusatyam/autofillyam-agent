@@ -24,6 +24,9 @@ export type SearchSemanticKey =
   | 'search.departure_date'
   | 'search.return_date'
   | 'search.passengers'
+  | 'search.adults'
+  | 'search.children'
+  | 'search.infants'
   | 'search.cabin_class'
   // Hotel
   | 'search.destination'

@@ -35,7 +35,10 @@ export const MOCK_SEARCH_PREFERENCES: SearchPreferences = {
     to_city:         'Mumbai',
     departure_date:  '2026-03-15',
     return_date:     '2026-03-22',
-    passengers:      2,
+    passengers:      5,
+    adults:          5,
+    children:        2,
+    infants:         2,
     cabin_class:     'Business',
   },
   hotel: {

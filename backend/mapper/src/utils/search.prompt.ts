@@ -13,6 +13,9 @@ const VERTICAL_KEYS: Record<string, string[]> = {
     'search.departure_date',
     'search.return_date',
     'search.passengers',
+    'search.adults',
+    'search.children',
+    'search.infants',
     'search.cabin_class',
   ],
   hotel: [
@@ -114,7 +117,10 @@ function _commonMappings(vertical: string): string {
    - "To" / "Destination" / "Arrival city"   → search.to_city
    - "Departure" / "Onward date"              → search.departure_date
    - "Return" / "Return date"                 → search.return_date
-   - "Passengers" / "Travellers" / "Adults"   → search.passengers
+   - "Passengers" / "Travellers"              → search.passengers
+   - "Adults" / "Adult passengers"            → search.adults
+   - "Children" / "Child passengers"          → search.children
+   - "Infants" / "Infant passengers"          → search.infants
    - "Class" / "Cabin class"                  → search.cabin_class`,
     hotel: `   - "Destination" / "City" / "Where"        → search.destination
    - "Check-in" / "Arrival date"              → search.checkin_date
