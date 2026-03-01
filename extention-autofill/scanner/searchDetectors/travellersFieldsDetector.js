@@ -173,9 +173,7 @@
 
     return hasPlus && hasMinus;
   }
-
   // ─── Travel Class Field Scanner ──────────────────────────────────────
-
   /**
    * Scan for travel class field (Economy, Premium, Business, First).
    * @param {Element} popup

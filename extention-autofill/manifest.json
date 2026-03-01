@@ -66,8 +66,7 @@
 
         "autofill/searchStrategies/locationFill.js",
         "autofill/searchStrategies/dateFill.js",
-        "autofill/searchStrategies/counterFill.js",
-        "autofill/searchStrategies/toggleFill.js",
+        "autofill/searchStrategies/travellersPopupFill.js",
         "autofill/searchStrategies/dropdownFill.js",
 
         "autofill/searchAutofill.js",
